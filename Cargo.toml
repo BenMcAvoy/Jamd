@@ -3,4 +3,26 @@ name = "jamd"
 version = "0.1.0"
 edition = "2021"
 
+description = "A Jam compiler wrote for the desktop"
+categories = [ "compilers", "command-line-utilities" ]
+repository = "https://github.com/BenMcAvoy/jamd"
+keywords = [ "assembly" ]
+license = "MIT"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+enum_glob_use = "deny"
+unwrap_used = "deny"
+correctness = "deny"
+pedantic = "deny"
+perf = "deny"
+
+suspicious = "warn"
+complexity = "warn"
+nursery = "warn"
+style = "warn"
+cargo = "warn"
+
 [dependencies]
