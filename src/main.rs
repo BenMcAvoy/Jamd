@@ -1,7 +1,7 @@
 mod ast;
 
 fn main() {
-    let input = "7 - (3 + 7) * 8 / 2";
+    let input = "721 - (332 + 753) * 82 / 21";
 
     let mut lexer = ast::Lexer::new(input);
     let mut tokens = Vec::new();
@@ -22,9 +22,14 @@ fn main() {
         .max()
         .unwrap_or(0);
 
+    let tokens: Vec<&ast::Token> = tokens
+        .iter()
+        .filter(|t| t.kind != ast::TokenKind::Whitespace)
+        .collect();
+
     for token in tokens {
         println!(
-            "{:<span_width$} {:<kind_width$} ({:?})",
+            "{:<span_width$}│ {:<kind_width$} ({:?})",
             format!("{}..{} ", token.span.start, token.span.end),
             format!("{:?}", token.kind),
             token.span.literal,

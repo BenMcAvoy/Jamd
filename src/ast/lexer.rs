@@ -1,6 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code))]
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenKind {
     Number(i64),
     Plus,
