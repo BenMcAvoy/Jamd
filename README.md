@@ -1,7 +1,7 @@
 # Jamd - [Jam](https://github.com/BenMcAvoy/StrawberryVM) for desktop.
 
 ## Roadmap
-### 04.02.2024 & 05.02.2024
+### 04.02.2024 - 08.02.2024
 - [x] Lexer
 - [ ] Parser
 
