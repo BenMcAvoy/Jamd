@@ -1,6 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code))]
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum TokenKind {
     Number(i64),
     Plus,
@@ -50,6 +50,15 @@ impl Token {
 pub struct Lexer<'a> {
     input: &'a str,
     current_pos: usize,
+}
+
+// Refactor into implementing iterators
+impl Iterator for Lexer<'_> {
+    type Item = Token;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next_token()
+    }
 }
 
 impl<'a> Lexer<'a> {
