@@ -6,6 +6,7 @@ use super::{
 #[derive(Default)]
 pub struct Evaluator {
     pub last_value: Option<i64>,
+    pub values: Vec<i64>,
 }
 
 impl Visitor for Evaluator {
@@ -23,7 +24,7 @@ impl Visitor for Evaluator {
             BinaryOperatorKind::Add => Some(left + right),
             BinaryOperatorKind::Subtract => Some(right - left),
             BinaryOperatorKind::Multiply => Some(left * right),
-            BinaryOperatorKind::Divide => Some(left / right),
+            BinaryOperatorKind::Divide => Some(right / left),
         };
     }
 
@@ -34,6 +35,10 @@ impl Visitor for Evaluator {
     fn visit_statement(&mut self, statement: &Statement) {
         match &statement.kind {
             StatementKind::Expression(expression) => self.visit_expression(expression),
+        }
+
+        if let Some(result) = self.last_value {
+            self.values.push(result);
         }
     }
 

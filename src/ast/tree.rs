@@ -65,7 +65,7 @@ impl Visitor for Printer {
     fn visit_binary_expression(&mut self, expr: &BinaryExpression) {
         self.print_with_indent("Binary expression:");
         self.indent += INDENT_SIZE;
-        self.print_with_indent(&format!("Operator {:?}", expr.operator.kind));
+        self.print_with_indent(&format!("Operator: {:?}", expr.operator.kind));
         self.visit_expression(&expr.left);
         self.visit_expression(&expr.right);
         self.indent -= INDENT_SIZE;
