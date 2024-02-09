@@ -1,3 +1,6 @@
-mod lexer;
+pub mod evaluator;
+pub mod lexer;
+pub mod parser;
 
-pub use lexer::*;
+mod tree;
+pub use tree::*;

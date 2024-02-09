@@ -3,7 +3,7 @@
 ## Roadmap
 ### 04.02.2024 & 05.02.2024
 - [x] Lexer
-- [ ] Parser
+- [x] Parser
 
 Functionality:
 ```

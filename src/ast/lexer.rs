@@ -1,6 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code))]
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum TokenKind {
     Number(i64),
     Plus,
@@ -14,7 +14,7 @@ pub enum TokenKind {
     Whitespace,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TextSpan {
     pub literal: String,
     pub start: usize,
@@ -35,7 +35,7 @@ impl TextSpan {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Token {
     pub kind: TokenKind,
     pub span: TextSpan,
@@ -52,7 +52,7 @@ pub struct Lexer<'a> {
     current_pos: usize,
 }
 
-// Refactor into implementing iterators
+// TODO: Refactor into implementing iterators
 impl Iterator for Lexer<'_> {
     type Item = Token;
 
