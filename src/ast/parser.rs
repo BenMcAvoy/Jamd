@@ -1,7 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
+// #![cfg_attr(debug_assertions, allow(dead_code))]
 
 use crate::ast::lexer::{Lexer, Token, TokenKind};
 use crate::ast::{Expression, Statement};
+use crate::diagnostics::BagCell;
 
 use super::{BinaryOperator, BinaryOperatorKind};
 
@@ -9,6 +10,7 @@ use super::{BinaryOperator, BinaryOperatorKind};
 pub struct Parser {
     tokens: Vec<Token>,
     current: usize,
+    bag: BagCell,
 }
 
 // TODO: Refactor into implementing iterators
@@ -21,65 +23,66 @@ impl Iterator for Parser {
 }
 
 impl Parser {
-    pub fn from_input(input: &str) -> Self {
+    pub fn from_input(input: &str, bag: BagCell) -> Self {
         let tokens: Vec<_> = Lexer::new(input)
             .filter(|t| t.kind != TokenKind::Whitespace)
             .collect();
 
-        Self { tokens, current: 0 }
-    }
-
-    pub fn from_tokens(tokens: Vec<Token>) -> Self {
-        Self { tokens, current: 0 }
+        Self { tokens, current: 0, bag }
     }
 
     pub fn next_statement(&mut self) -> Option<Statement> {
-        self.parse_statement()
-    }
-
-    fn parse_statement(&mut self) -> Option<Statement> {
-        if self.current()?.kind == TokenKind::Eof {
+        if self.current().kind == TokenKind::Eof {
             return None;
         }
 
-        // let _token = self.current()?;
-        let expr = self.parse_expression()?;
-
-        Some(Statement::expression(expr))
+        Some(self.parse_statement())
     }
 
-    fn parse_expression(&mut self) -> Option<Expression> {
+    fn parse_statement(&mut self) -> Statement {
+        let expr = self.parse_expression();
+        Statement::expression(expr)
+    }
+
+    fn parse_expression(&mut self) -> Expression {
         self.parse_binary_expression(0)
     }
 
-    fn parse_binary_expression(&mut self, precedence: u8) -> Option<Expression> {
-        let mut left = self.parse_primary_expression()?;
+    fn parse_binary_expression(&mut self, precedence: u8) -> Expression {
+        let mut left = self.parse_primary_expression();
 
         while let Some(operator) = self.parse_binary_operator() {
-            self.consume()?;
+            // Consume the operator
+            self.consume();
+
+            // Get the precedence
             let op_precedence = operator.precedence();
 
+            // Break if the operator has lower precedence
             if op_precedence <= precedence {
                 println!("Precedence is lower than current, breaking");
                 break;
             }
 
-            let right = self.parse_binary_expression(op_precedence)?;
+            // Parse the right hand side
+            let right = self.parse_binary_expression(op_precedence);
 
-            left = Expression::binary(right, left, operator);
+            // Combine the left and right hand side
+            left = Expression::binary(left, right, operator);
         }
 
-        Some(left)
+        left
     }
 
     fn parse_binary_operator(&mut self) -> Option<BinaryOperator> {
-        let token = self.current()?;
+        let token = self.current();
 
         let kind = match token.kind {
             TokenKind::Plus => Some(BinaryOperatorKind::Add),
             TokenKind::Minus => Some(BinaryOperatorKind::Subtract),
             TokenKind::Asterisk => Some(BinaryOperatorKind::Multiply),
             TokenKind::Slash => Some(BinaryOperatorKind::Divide),
+            TokenKind::Mod => Some(BinaryOperatorKind::Mod),
             _ => None,
         };
 
@@ -90,39 +93,55 @@ impl Parser {
         })
     }
 
-    fn parse_primary_expression(&mut self) -> Option<Expression> {
-        let token = self.consume()?;
+    fn parse_primary_expression(&mut self) -> Expression {
+        let token = self.consume();
 
         match token.kind {
-            TokenKind::Number(n) => Some(Expression::number(n)),
+            TokenKind::Number(n) => Expression::number(n),
             TokenKind::LeftParen => {
-                let expr = self.parse_expression()?;
+                let expr = self.parse_expression();
 
-                assert_eq!(self.consume()?.kind, TokenKind::RightParen);
+                assert_eq!(self.consume().kind, TokenKind::RightParen);
 
                 // Some(expr)
-                Some(Expression::parenthesized(expr.kind))
+                Expression::parenthesized(expr.kind)
             }
 
             _ => {
-                println!("Unexpected token: {token:?}");
-                None
+                // self.bag.borrow_mut().report_error(
+                //     format!("Unexpected token: {token:?}"),
+                //     token.span.clone(),
+                // );
+
+                eprintln!("Unexpected token: {token:?}");
+                // self.bag.borrow_mut().report_unexpected_expression(token);
+                Expression::error(token.span.clone())
             }
         }
     }
 
-    fn peek(&self, offset: isize) -> Option<&Token> {
-        let index = self.current.wrapping_add_signed(offset);
-        self.tokens.get(index)
+    fn peek(&self, offset: isize) -> &Token {
+        let index = self.current.wrapping_add_signed(offset) % self.tokens.len();
+        self.tokens.get(index).expect("Out of bounds")
     }
 
-    fn current(&self) -> Option<&Token> {
+    fn current(&self) -> &Token {
         self.peek(0)
     }
 
-    fn consume(&mut self) -> Option<&Token> {
+    fn consume(&mut self) -> &Token {
         self.current += 1;
-        let token = self.peek(-1)?;
-        Some(token)
+        self.peek(-1)
+    }
+
+    fn consume_and_check(&mut self, kind: &TokenKind) -> &Token {
+        let token = self.consume();
+
+        if token.kind != *kind {
+            eprintln!("Unexpected token: {token:?}");
+            // self.bag.borrow_mut().report_unexpected_token(kind, token)
+        }
+
+        token
     }
 }

@@ -1,4 +1,4 @@
-use super::lexer::Token;
+use super::lexer::{TextSpan, Token};
 
 #[derive(Default, Debug)]
 pub struct Ast {
@@ -28,6 +28,7 @@ pub trait Visitor {
     fn visit_number(&mut self, number: i64);
     fn visit_binary_expression(&mut self, expr: &BinaryExpression);
     fn visit_parenthesized_expression(&mut self, expr: &ParenthesizedExpression);
+    fn visit_error_expression(&mut self, expr: &TextSpan);
 }
 
 #[derive(Default)]
@@ -57,6 +58,7 @@ impl Visitor for Printer {
             ExpressionKind::Number(number) => self.visit_number(number.number),
             ExpressionKind::Binary(expr) => self.visit_binary_expression(expr),
             ExpressionKind::Parenthesized(expr) => self.visit_parenthesized_expression(expr),
+            ExpressionKind::Error(expr) => self.visit_error_expression(expr),
         }
 
         self.indent -= INDENT_SIZE;
@@ -76,6 +78,10 @@ impl Visitor for Printer {
         self.indent += INDENT_SIZE;
         self.visit_expression(&expr.expression);
         self.indent -= INDENT_SIZE;
+    }
+
+    fn visit_error_expression(&mut self, expr: &TextSpan) {
+        println!("Error expression: {}", expr.literal);
     }
 }
 
@@ -114,6 +120,7 @@ pub enum ExpressionKind {
     Number(NumberExpression),
     Binary(BinaryExpression),
     Parenthesized(ParenthesizedExpression),
+    Error(TextSpan),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -139,6 +146,7 @@ pub enum BinaryOperatorKind {
     Subtract,
     Multiply,
     Divide,
+    Mod,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -150,7 +158,7 @@ pub struct BinaryOperator {
 impl BinaryOperator {
     pub const fn precedence(&self) -> u8 {
         match self.kind {
-            BinaryOperatorKind::Add | BinaryOperatorKind::Subtract => 1,
+            BinaryOperatorKind::Add | BinaryOperatorKind::Subtract | BinaryOperatorKind::Mod => 1,
             BinaryOperatorKind::Multiply | BinaryOperatorKind::Divide => 2,
         }
     }
@@ -168,6 +176,10 @@ impl Expression {
 
     pub const fn number(number: i64) -> Self {
         Self::new(ExpressionKind::Number(NumberExpression { number }))
+    }
+
+    pub const fn error(span: TextSpan) -> Self {
+        Self::new(ExpressionKind::Error(span))
     }
 
     pub fn binary(left: Self, right: Self, operator: BinaryOperator) -> Self {

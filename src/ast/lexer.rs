@@ -10,6 +10,7 @@ pub enum TokenKind {
     LeftParen,
     RightParen,
     Bad,
+    Mod,
     Eof,
     Whitespace,
 }
@@ -52,26 +53,10 @@ pub struct Lexer<'a> {
     current_pos: usize,
 }
 
-// TODO: Refactor into implementing iterators
 impl Iterator for Lexer<'_> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.next_token()
-    }
-}
-
-impl<'a> Lexer<'a> {
-    pub const fn new(input: &'a str) -> Self {
-        Self {
-            input,
-            current_pos: 0,
-        }
-    }
-
-    // FIXME: Can be re-done by implementing the iterator trait on `Lexer` and
-    // using the `next()` method on the iterator trait.
-    pub fn next_token(&mut self) -> Option<Token> {
         if self.current_pos == self.input.len() {
             self.current_pos += 1;
 
@@ -106,6 +91,15 @@ impl<'a> Lexer<'a> {
 
             Token::new(kind, span)
         })
+    }
+}
+
+impl<'a> Lexer<'a> {
+    pub const fn new(input: &'a str) -> Self {
+        Self {
+            input,
+            current_pos: 0,
+        }
     }
 
     fn consume(&mut self) -> Option<char> {
@@ -143,6 +137,7 @@ impl<'a> Lexer<'a> {
             '/' => TokenKind::Slash,
             '(' => TokenKind::LeftParen,
             ')' => TokenKind::RightParen,
+            '%' => TokenKind::Mod,
             _ => TokenKind::Bad,
         }
     }

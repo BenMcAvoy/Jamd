@@ -1,6 +1,6 @@
 use super::{
-    BinaryExpression, BinaryOperatorKind, Expression, ExpressionKind, Statement, StatementKind,
-    Visitor,
+    lexer::TextSpan, BinaryExpression, BinaryOperatorKind, Expression, ExpressionKind, Statement,
+    StatementKind, Visitor,
 };
 
 #[derive(Default)]
@@ -22,9 +22,10 @@ impl Visitor for Evaluator {
 
         self.last_value = match expr.operator.kind {
             BinaryOperatorKind::Add => Some(left + right),
-            BinaryOperatorKind::Subtract => Some(right - left),
+            BinaryOperatorKind::Subtract => Some(left - right),
             BinaryOperatorKind::Multiply => Some(left * right),
-            BinaryOperatorKind::Divide => Some(right / left),
+            BinaryOperatorKind::Divide => Some(left / right),
+            BinaryOperatorKind::Mod => Some(left % right),
         };
     }
 
@@ -47,6 +48,12 @@ impl Visitor for Evaluator {
             ExpressionKind::Number(number) => self.visit_number(number.number),
             ExpressionKind::Binary(expr) => self.visit_binary_expression(expr),
             ExpressionKind::Parenthesized(expr) => self.visit_parenthesized_expression(expr),
+            ExpressionKind::Error(expr) => self.visit_error_expression(expr),
         }
+    }
+
+    fn visit_error_expression(&mut self, expr: &TextSpan) {
+        println!("Error expression! {expr:?}");
+        panic!("Error");
     }
 }

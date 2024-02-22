@@ -1,9 +1,15 @@
 mod ast;
+mod diagnostics;
+mod text;
+
+use std::cell::RefCell;
+use std::rc::Rc;
 
 use ast::parser::Parser;
 use ast::Ast;
 
 use crate::ast::evaluator::Evaluator;
+use crate::diagnostics::BagCell;
 
 fn main() {
     // Check if user supplied a valid file
@@ -14,7 +20,10 @@ fn main() {
         |file| std::fs::read_to_string(file).expect("Failed to read file"),
     );
 
-    let parser = Parser::from_input(&input);
+    let diagnostics_bag: BagCell = Rc::new(RefCell::new(diagnostics::Bag::default()));
+
+    let parser = Parser::from_input(&input, diagnostics_bag);
+
     let mut ast = Ast::default();
 
     parser.for_each(|statement| {
