@@ -23,6 +23,7 @@ suspicious = "warn"
 complexity = "warn"
 nursery = "warn"
 style = "warn"
-cargo = "warn"
+
+cargo = { level = "warn", priority = -1 }
 
 [dependencies]

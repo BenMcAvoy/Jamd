@@ -9,3 +9,7 @@ Functionality:
 ```
 7 - (3 + 7) * 8 / 2
 ```
+
+### Other functionality
+- [ ] Variables
+- [ ] Functions
