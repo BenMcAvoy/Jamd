@@ -4,12 +4,13 @@ use crate::ast::lexer::{Lexer, Token, TokenKind};
 use crate::ast::{Expression, Statement};
 use crate::diagnostics::BagCell;
 
+use super::counter::Counter;
 use super::{BinaryOperator, BinaryOperatorKind};
 
 #[derive(Default)]
 pub struct Parser {
     tokens: Vec<Token>,
-    current: usize,
+    current: Counter,
     bag: BagCell,
 }
 
@@ -28,7 +29,7 @@ impl Parser {
             .filter(|t| t.kind != TokenKind::Whitespace)
             .collect();
 
-        Self { tokens, current: 0, bag }
+        Self { tokens, current: Counter::default(), bag }
     }
 
     pub fn next_statement(&mut self) -> Option<Statement> {
@@ -100,27 +101,20 @@ impl Parser {
             TokenKind::Number(n) => Expression::number(n),
             TokenKind::LeftParen => {
                 let expr = self.parse_expression();
+                self.consume_and_check(&TokenKind::RightParen);
 
-                assert_eq!(self.consume().kind, TokenKind::RightParen);
-
-                // Some(expr)
                 Expression::parenthesized(expr.kind)
             }
 
             _ => {
-                // self.bag.borrow_mut().report_error(
-                //     format!("Unexpected token: {token:?}"),
-                //     token.span.clone(),
-                // );
-
-                eprintln!("Unexpected token: {token:?}");
-                // self.bag.borrow_mut().report_unexpected_expression(token);
+                self.bag.borrow_mut().report_unexpected_expression(token);
                 Expression::error(token.span.clone())
             }
         }
     }
 
     fn peek(&self, offset: isize) -> &Token {
+        // let index = self.current.get() + offset as usize;
         let index = self.current.wrapping_add_signed(offset) % self.tokens.len();
         self.tokens.get(index).expect("Out of bounds")
     }
@@ -129,17 +123,18 @@ impl Parser {
         self.peek(0)
     }
 
-    fn consume(&mut self) -> &Token {
-        self.current += 1;
+    fn consume(&self) -> &Token {
+        self.current.increment();
+        println!("Consuming token at index {}", self.current.get());
         self.peek(-1)
     }
 
-    fn consume_and_check(&mut self, kind: &TokenKind) -> &Token {
+    fn consume_and_check(&self, kind: &TokenKind) -> &Token {
         let token = self.consume();
 
         if token.kind != *kind {
             eprintln!("Unexpected token: {token:?}");
-            // self.bag.borrow_mut().report_unexpected_token(kind, token)
+            self.bag.borrow_mut().report_unexpected_token(kind, token);
         }
 
         token

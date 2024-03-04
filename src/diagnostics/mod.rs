@@ -1,4 +1,4 @@
-mod printer;
+pub mod printer;
 
 use crate::ast::lexer::{TextSpan, Token, TokenKind};
 use std::{cell::RefCell, rc::Rc};
@@ -28,7 +28,7 @@ impl Diagnostic {
 
 #[derive(Default)]
 pub struct Bag {
-    diagnostics: Vec<Diagnostic>,
+    pub(crate) diagnostics: Vec<Diagnostic>,
 }
 
 impl Bag {

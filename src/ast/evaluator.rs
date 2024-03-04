@@ -48,12 +48,11 @@ impl Visitor for Evaluator {
             ExpressionKind::Number(number) => self.visit_number(number.number),
             ExpressionKind::Binary(expr) => self.visit_binary_expression(expr),
             ExpressionKind::Parenthesized(expr) => self.visit_parenthesized_expression(expr),
-            ExpressionKind::Error(expr) => self.visit_error_expression(expr),
+            ExpressionKind::Error(span) => self.visit_error(span),
         }
     }
 
-    fn visit_error_expression(&mut self, expr: &TextSpan) {
-        println!("Error expression! {expr:?}");
-        panic!("Error");
+    fn visit_error(&mut self, span: &TextSpan) {
+        todo!()
     }
 }

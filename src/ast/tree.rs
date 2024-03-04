@@ -28,7 +28,7 @@ pub trait Visitor {
     fn visit_number(&mut self, number: i64);
     fn visit_binary_expression(&mut self, expr: &BinaryExpression);
     fn visit_parenthesized_expression(&mut self, expr: &ParenthesizedExpression);
-    fn visit_error_expression(&mut self, expr: &TextSpan);
+    fn visit_error(&mut self, expr: &TextSpan);
 }
 
 #[derive(Default)]
@@ -58,7 +58,7 @@ impl Visitor for Printer {
             ExpressionKind::Number(number) => self.visit_number(number.number),
             ExpressionKind::Binary(expr) => self.visit_binary_expression(expr),
             ExpressionKind::Parenthesized(expr) => self.visit_parenthesized_expression(expr),
-            ExpressionKind::Error(expr) => self.visit_error_expression(expr),
+            ExpressionKind::Error(span) => self.visit_error(span),
         }
 
         self.indent -= INDENT_SIZE;
@@ -80,8 +80,8 @@ impl Visitor for Printer {
         self.indent -= INDENT_SIZE;
     }
 
-    fn visit_error_expression(&mut self, expr: &TextSpan) {
-        println!("Error expression: {}", expr.literal);
+    fn visit_error(&mut self, span: &TextSpan) {
+        self.print_with_indent(&format!("Error expression: {}", span.literal));
     }
 }
 

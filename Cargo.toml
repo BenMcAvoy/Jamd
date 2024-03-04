@@ -27,3 +27,4 @@ style = "warn"
 cargo = { level = "warn", priority = -1 }
 
 [dependencies]
+termion = "3.0.0"

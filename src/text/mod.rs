@@ -8,10 +8,14 @@ impl Source {
     }
 
     pub fn line_index(&self, position: usize) -> usize {
-        self.text[position..].lines().count()
+        self.text[..position].lines().count()
     }
 
     pub fn get_line(&self, index: usize) -> &str {
         self.text.lines().nth(index).unwrap_or_default()
+    }
+
+    pub fn line_start(&self, index: usize) -> usize {
+        self.text.lines().take(index).map(|line| line.len() + 1).sum()
     }
 }

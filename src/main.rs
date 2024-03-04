@@ -8,7 +8,6 @@ use std::rc::Rc;
 use ast::parser::Parser;
 use ast::Ast;
 
-use crate::ast::evaluator::Evaluator;
 use crate::diagnostics::BagCell;
 
 fn main() {
@@ -16,33 +15,41 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     let input = args.get(1).map_or_else(
-        || String::from("7 - (2 * 9)\n2 - 5"),
+        || String::from("(12 % 5) & 5"),
         |file| std::fs::read_to_string(file).expect("Failed to read file"),
     );
 
     let diagnostics_bag: BagCell = Rc::new(RefCell::new(diagnostics::Bag::default()));
 
-    let parser = Parser::from_input(&input, diagnostics_bag);
+    let parser = Parser::from_input(&input.clone(), Rc::clone(&diagnostics_bag));
 
     let mut ast = Ast::default();
 
     parser.for_each(|statement| {
+        println!("Parsed statement");
         ast.add_statement(statement);
     });
 
     ast.visualize();
 
-    println!("\nEvaluating...");
-    let mut evaluator = Evaluator::default();
-    ast.visit(&mut evaluator);
+    let text = text::Source::new(input);
+    let diagnostics_binding = diagnostics_bag.borrow();
+    if !diagnostics_binding.diagnostics.is_empty() {
+        let diagnostics_printer = diagnostics::printer::Printer::new(&text, &diagnostics_binding.diagnostics);
+        diagnostics_printer.print();
+    }
 
-    // Print values nicer:
-    let values = evaluator
-        .values
-        .iter()
-        .map(ToString::to_string)
-        .collect::<Vec<String>>()
-        .join(", ");
+    // println!("\nEvaluating...");
+    // let mut evaluator = Evaluator::default();
+    // ast.visit(&mut evaluator);
 
-    println!("\nStatement return values: {values}");
+    // // Print values nicer:
+    // let values = evaluator
+    //     .values
+    //     .iter()
+    //     .map(ToString::to_string)
+    //     .collect::<Vec<String>>()
+    //     .join(", ");
+
+    // println!("\nStatement return values: {values}");
 }
