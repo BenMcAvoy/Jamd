@@ -14,7 +14,6 @@ impl Counter {
 
     pub fn increment(&self) {
         let next = self.count.get() + 1;
-        println!("Incrementing counter to {next}");
         self.count.set(next);
     }
 

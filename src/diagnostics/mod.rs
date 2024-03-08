@@ -44,15 +44,15 @@ impl Bag {
 
     pub fn report_unexpected_token(&mut self, expected: &TokenKind, actual: &Token) {
         self.report_error(
-            format!("Expected {expected:?}, found {actual:?}"),
+            format!("Expected <{expected:?}>, found <{:?}>", actual.kind),
             actual.span.clone(),
         );
     }
 
-    pub fn report_unexpected_expression(&mut self, expected: &Token) {
+    pub fn report_expected_expression(&mut self, token: &Token) {
         self.report_error(
-            format!("Unexpected expression {expected:?}"),
-            expected.span.clone(),
+            format!("Expected expression, found <{:?}>", token.kind),
+            token.span.clone(),
         );
     }
 }

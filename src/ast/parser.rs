@@ -29,7 +29,11 @@ impl Parser {
             .filter(|t| t.kind != TokenKind::Whitespace)
             .collect();
 
-        Self { tokens, current: Counter::default(), bag }
+        Self {
+            tokens,
+            current: Counter::default(),
+            bag,
+        }
     }
 
     pub fn next_statement(&mut self) -> Option<Statement> {
@@ -107,7 +111,7 @@ impl Parser {
             }
 
             _ => {
-                self.bag.borrow_mut().report_unexpected_expression(token);
+                self.bag.borrow_mut().report_expected_expression(token);
                 Expression::error(token.span.clone())
             }
         }
@@ -125,7 +129,6 @@ impl Parser {
 
     fn consume(&self) -> &Token {
         self.current.increment();
-        println!("Consuming token at index {}", self.current.get());
         self.peek(-1)
     }
 
@@ -133,7 +136,7 @@ impl Parser {
         let token = self.consume();
 
         if token.kind != *kind {
-            eprintln!("Unexpected token: {token:?}");
+            // eprintln!("Unexpected token: {token:?}");
             self.bag.borrow_mut().report_unexpected_token(kind, token);
         }
 

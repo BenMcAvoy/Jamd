@@ -1,6 +1,5 @@
 use super::{
-    lexer::TextSpan, BinaryExpression, BinaryOperatorKind, Expression, ExpressionKind, Statement,
-    StatementKind, Visitor,
+    lexer::TextSpan, BinaryExpression, BinaryOperatorKind, Expression, ExpressionKind, NumberExpression, Statement, StatementKind, Visitor
 };
 
 #[derive(Default)]
@@ -10,8 +9,8 @@ pub struct Evaluator {
 }
 
 impl Visitor for Evaluator {
-    fn visit_number(&mut self, number: i64) {
-        self.last_value = Some(number);
+    fn visit_number(&mut self, number: &NumberExpression) {
+        self.last_value = Some(number.number);
     }
 
     fn visit_binary_expression(&mut self, expr: &BinaryExpression) {
@@ -33,26 +32,26 @@ impl Visitor for Evaluator {
         self.visit_expression(expr.expression.as_ref());
     }
 
-    fn visit_statement(&mut self, statement: &Statement) {
-        match &statement.kind {
-            StatementKind::Expression(expression) => self.visit_expression(expression),
-        }
+    // fn visit_statement(&mut self, statement: &Statement) {
+    //     match &statement.kind {
+    //         StatementKind::Expression(expression) => self.visit_expression(expression),
+    //     }
 
-        if let Some(result) = self.last_value {
-            self.values.push(result);
-        }
-    }
+    //     if let Some(result) = self.last_value {
+    //         self.values.push(result);
+    //     }
+    // }
 
     fn visit_expression(&mut self, expression: &Expression) {
         match &expression.kind {
-            ExpressionKind::Number(number) => self.visit_number(number.number),
+            ExpressionKind::Number(number) => self.visit_number(number),
             ExpressionKind::Binary(expr) => self.visit_binary_expression(expr),
             ExpressionKind::Parenthesized(expr) => self.visit_parenthesized_expression(expr),
             ExpressionKind::Error(span) => self.visit_error(span),
         }
     }
 
-    fn visit_error(&mut self, span: &TextSpan) {
+    fn visit_error(&mut self, _span: &TextSpan) {
         todo!()
     }
 }

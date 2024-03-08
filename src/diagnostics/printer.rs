@@ -22,9 +22,8 @@ impl<'a> Printer<'a> {
     /// Stringify the diagnostic.
     /// ## Format:
     /// let <red>x<reset> = 5;
-    ///          ^
-    ///          |
-    ///          +-- Error message here (<file>:<line>:<column>)
+    ///          │
+    ///          └─ Error message here (<file>:<line>:<column>)
     ///
     pub fn stringify_diagnostic(&self, diagnostic: &Diagnostic) -> String {
         let index = self.text.line_index(diagnostic.span.start);
@@ -35,7 +34,7 @@ impl<'a> Printer<'a> {
         let column = diagnostic.span.start.saturating_sub(start);
         // let column = diagnostic.span.start - start;
 
-        let prefix_start = max(0, column - PREFIX_LENGTH) as usize;
+        let prefix_start = max(0, column as isize - PREFIX_LENGTH as isize) as usize;
         let prefix_end = column;
 
         let suffix_start = min(column + diagnostic.span.length(), line.len()) + 1;
@@ -47,12 +46,28 @@ impl<'a> Printer<'a> {
 
         let indent = max(PREFIX_LENGTH, column);
 
-        let arrow_pointers = format!("{:indent$}{}", "", "^".repeat(diagnostic.span.length()).to_string(), indent = indent);
-        let arrow_line = format!("{:indent$}|", "", indent = indent);
+        let arrow_pointers = format!(
+            "{:indent$}{}",
+            "",
+            "│".repeat(diagnostic.span.length()),
+            indent = indent
+        );
+        // let arrow_line = format!("{:indent$}│", "", indent = indent);
 
-        let error_message = format!("{:indent$}+-- {}", "", diagnostic.message, indent = indent);
+        let error_message = format!("{:indent$}└─ {}", "", diagnostic.message, indent = indent);
 
-        format!("{}{}{}{}{}\n{}\n{}\n{}", prefix, Fg(Red), span, Fg(Reset), suffix, arrow_pointers, arrow_line, error_message)
+        // format!("{}{}{}{}{}\n{}\n{}\n{}", prefix, Fg(Red), span, Fg(Reset), suffix, arrow_pointers, arrow_line, error_message)
+        // format!(
+        //     "{prefix}{red}{span}{reset}{suffix}{red}\n{arrow_pointers}\n{error_message}{reset}",
+        //     red = Fg(Red),
+        //     reset = Fg(Reset)
+        // )
+
+        format!(
+            "{prefix}{red}{span}{reset}{suffix}{red}\n{error_message}{reset}",
+            red = Fg(Red),
+            reset = Fg(Reset)
+        )
     }
 
     pub fn print(&self) {

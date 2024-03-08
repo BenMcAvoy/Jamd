@@ -1,3 +1,5 @@
+use termion::color::{self, Fg};
+
 use super::lexer::{TextSpan, Token};
 
 #[derive(Default, Debug)]
@@ -23,9 +25,9 @@ impl Ast {
 }
 
 pub trait Visitor {
-    fn visit_statement(&mut self, statement: &Statement);
+    // fn visit_statement(&mut self, statement: &Statement);
     fn visit_expression(&mut self, expression: &Expression);
-    fn visit_number(&mut self, number: i64);
+    fn visit_number(&mut self, number: &NumberExpression);
     fn visit_binary_expression(&mut self, expr: &BinaryExpression);
     fn visit_parenthesized_expression(&mut self, expr: &ParenthesizedExpression);
     fn visit_error(&mut self, expr: &TextSpan);
@@ -34,20 +36,47 @@ pub trait Visitor {
 #[derive(Default)]
 pub struct Printer {
     indent: usize,
+    result: String,
+}
+
+impl Printer {
+    const NUMBER_COLOR: color::Cyan = color::Cyan;
+    const TEXT_COLOR: color::White = color::White;
+
+    fn add_whitespace(&mut self) {
+        self.result.push_str(" ");
+    }
+
+    fn add_newline(&mut self) {
+        self.result.push_str("\n");
+    }
+
+    fn print_with_indent(&self, message: &str) {
+        println!("{}{}", " ".repeat(self.indent), message);
+    }
 }
 
 impl Visitor for Printer {
-    fn visit_number(&mut self, number: i64) {
-        self.print_with_indent(&format!("Number: {number}"));
+    // fn visit_statement(&mut self, statement: &Statement) {
+    //     self.print_with_indent("Statement:");
+    //     self.indent += INDENT_SIZE;
+    //     match &statement.kind {
+    //         StatementKind::Expression(expression) => self.visit_expression(expression),
+    //     }
+    //     self.indent -= INDENT_SIZE;
+    // }
+
+    fn visit_number(&mut self, number: &NumberExpression) {
+        self.result.push_str(&format!(
+            "{}{}",
+            color::Fg(Printer::NUMBER_COLOR),
+            number.number,
+        ));
     }
 
-    fn visit_statement(&mut self, statement: &Statement) {
-        self.print_with_indent("Statement:");
-        self.indent += INDENT_SIZE;
-        match &statement.kind {
-            StatementKind::Expression(expression) => self.visit_expression(expression),
-        }
-        self.indent -= INDENT_SIZE;
+    fn visit_error(&mut self, span: &TextSpan) {
+        self.result
+            .push_str(&format!("{}{}", Fg(Printer::TEXT_COLOR), span.literal));
     }
 
     fn visit_expression(&mut self, expression: &Expression) {
@@ -55,7 +84,7 @@ impl Visitor for Printer {
         self.indent += INDENT_SIZE;
 
         match &expression.kind {
-            ExpressionKind::Number(number) => self.visit_number(number.number),
+            ExpressionKind::Number(number) => self.visit_number(number),
             ExpressionKind::Binary(expr) => self.visit_binary_expression(expr),
             ExpressionKind::Parenthesized(expr) => self.visit_parenthesized_expression(expr),
             ExpressionKind::Error(span) => self.visit_error(span),
@@ -79,19 +108,11 @@ impl Visitor for Printer {
         self.visit_expression(&expr.expression);
         self.indent -= INDENT_SIZE;
     }
-
-    fn visit_error(&mut self, span: &TextSpan) {
-        self.print_with_indent(&format!("Error expression: {}", span.literal));
-    }
 }
 
 const INDENT_SIZE: usize = 2;
 
-impl Printer {
-    fn print_with_indent(&self, message: &str) {
-        println!("{}{}", " ".repeat(self.indent), message);
-    }
-}
+impl Printer {}
 
 // Statement
 #[derive(Debug)]

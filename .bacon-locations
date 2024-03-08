@@ -1,0 +1,5 @@
+warning /home/ben/Code/Jamd/src/diagnostics/printer.rs:24:13 unclosed HTML tag `red`
+warning /home/ben/Code/Jamd/src/diagnostics/printer.rs:24:19 unclosed HTML tag `reset`
+warning /home/ben/Code/Jamd/src/diagnostics/printer.rs:26:41 unclosed HTML tag `file`
+warning /home/ben/Code/Jamd/src/diagnostics/printer.rs:26:48 unclosed HTML tag `line`
+warning /home/ben/Code/Jamd/src/diagnostics/printer.rs:26:55 unclosed HTML tag `column`
