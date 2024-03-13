@@ -18,7 +18,11 @@ fn main() {
     let input = args.get(1).map_or_else(
         || {
             String::from(
-                "7 + 8 * 9",
+                "
+                let a = 10
+                let b = 20
+                let c = a + b
+            ",
             )
         },
         |file| std::fs::read_to_string(file).expect("Failed to read file"),

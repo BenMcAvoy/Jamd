@@ -36,7 +36,9 @@ pub trait Visitor {
         match &expression.kind {
             ExpressionKind::Number(number) => self.visit_number(number),
             ExpressionKind::Binary(binary) => self.visit_binary_expression(binary),
-            ExpressionKind::Parenthesized(parenthesized) => self.visit_parenthesized_expression(parenthesized),
+            ExpressionKind::Parenthesized(parenthesized) => {
+                self.visit_parenthesized_expression(parenthesized)
+            }
             ExpressionKind::Error(span) => self.visit_error(span),
         }
     }
@@ -90,10 +92,10 @@ impl Visitor for Printer {
 
     fn visit_number(&mut self, number: &NumberExpression) {
         self.result.push_str(&format!(
-                "{}{}",
-                color::Fg(Self::NUMBER_COLOR),
-                number.number,
-                ));
+            "{}{}",
+            color::Fg(Self::NUMBER_COLOR),
+            number.number,
+        ));
     }
 
     fn visit_error(&mut self, span: &TextSpan) {
@@ -105,10 +107,10 @@ impl Visitor for Printer {
         self.visit_expression(&expr.left);
         self.add_whitespace();
         self.result.push_str(&format!(
-                "{}{}",
-                color::Fg(Self::TEXT_COLOR),
-                expr.operator.token.span.literal
-                ));
+            "{}{}",
+            color::Fg(Self::TEXT_COLOR),
+            expr.operator.token.span.literal
+        ));
         self.add_whitespace();
         self.visit_expression(&expr.right);
     }

@@ -53,6 +53,6 @@ impl Visitor for Evaluator {
     }
 
     fn visit_error(&mut self, _span: &TextSpan) {
-        todo!()
+        println!("Cannot evaluate error expression");
     }
 }

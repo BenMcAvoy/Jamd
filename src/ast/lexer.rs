@@ -12,7 +12,33 @@ pub enum TokenKind {
     Bad,
     Mod,
     Whitespace,
+    Let,
+    Identifier(String),
+    Equals,
     Eof,
+}
+
+impl std::fmt::Display for TokenKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let string = match self {
+            Self::Number(_) => "Number",
+            Self::Plus => "+",
+            Self::Minus => "-",
+            Self::Asterisk => "*",
+            Self::Slash => "/",
+            Self::LeftParen => "(",
+            Self::RightParen => ")",
+            Self::Bad => "Bad",
+            Self::Mod => "%",
+            Self::Whitespace => "Whitespace",
+            Self::Let => "Let",
+            Self::Identifier(identifier) => identifier,
+            Self::Equals => "=",
+            Self::Eof => "EOF",
+        };
+
+        write!(f, "{}", string.to_string())
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -82,6 +108,15 @@ impl Iterator for Lexer<'_> {
                     TokenKind::Whitespace
                 }
 
+                _ if char.is_alphabetic() => {
+                    let identifier = self.consume_identifier();
+
+                    match identifier.as_str() {
+                        "let" => TokenKind::Let,
+                        _ => TokenKind::Identifier(identifier),
+                    }
+                }
+
                 _ => self.consume_punctuation(),
             };
 
@@ -138,8 +173,24 @@ impl<'a> Lexer<'a> {
             '(' => TokenKind::LeftParen,
             ')' => TokenKind::RightParen,
             '%' => TokenKind::Mod,
+            '=' => TokenKind::Equals,
             _ => TokenKind::Bad,
         }
+    }
+
+    fn consume_identifier(&mut self) -> String {
+        let mut identifier = String::new();
+
+        while let Some(c) = self.current_char() {
+            if c.is_alphabetic() {
+                self.consume();
+                identifier.push(c);
+            } else {
+                break;
+            }
+        }
+
+        identifier
     }
 
     fn current_char(&self) -> Option<char> {
