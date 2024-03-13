@@ -18,11 +18,7 @@ fn main() {
     let input = args.get(1).map_or_else(
         || {
             String::from(
-                "
-        let a = 10
-        let b = 20
-        let c = a + b
-        ",
+                "7 + 8 * 9",
             )
         },
         |file| std::fs::read_to_string(file).expect("Failed to read file"),
@@ -50,14 +46,15 @@ fn main() {
 
     let mut evaluator = Evaluator::default();
     ast.visit(&mut evaluator);
+    println!("\nStatement return value: {:?}", evaluator.last_value);
 
     // Print values nicer:
-    let values = evaluator
-        .values
-        .iter()
-        .map(ToString::to_string)
-        .collect::<Vec<String>>()
-        .join(", ");
+    // let values = evaluator
+    //     .values
+    //     .iter()
+    //     .map(ToString::to_string)
+    //     .collect::<Vec<String>>()
+    //     .join(", ");
 
-    println!("\nStatement return values: {values}");
+    // println!("\nStatement return values: {values}");
 }

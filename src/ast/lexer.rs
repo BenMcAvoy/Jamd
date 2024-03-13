@@ -11,8 +11,8 @@ pub enum TokenKind {
     RightParen,
     Bad,
     Mod,
-    Eof,
     Whitespace,
+    Eof,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]

@@ -1,5 +1,6 @@
 use super::{
-    lexer::TextSpan, BinaryExpression, BinaryOperatorKind, Expression, ExpressionKind, NumberExpression, Statement, StatementKind, Visitor
+    lexer::TextSpan, BinaryExpression, BinaryOperatorKind, Expression, ExpressionKind,
+    NumberExpression, Statement, StatementKind, Visitor,
 };
 
 #[derive(Default)]
